@@ -13,7 +13,8 @@ from app.api import (
     hospital_api,
     whatsapp_api,
     kiosk_api,
-    admin_api
+    admin_api,
+    websocket_api
 )
 
 # 1. Create DB tables
@@ -29,8 +30,8 @@ finally:
 # 3. Create FastAPI App
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="Kerala Medical Center 24x7 Malayalam Front Office AI Voice Bot Backend",
-    version="1.0.0"
+    description="Kerala Medical Center 24x7 Multilingual Hospital Voice Assistant",
+    version="2.0.0"
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -67,6 +68,7 @@ app.include_router(hospital_api.router)
 app.include_router(whatsapp_api.router)
 app.include_router(kiosk_api.router)
 app.include_router(admin_api.router)
+app.include_router(websocket_api.router)
 
 if __name__ == "__main__":
     import uvicorn

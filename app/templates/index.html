@@ -14,7 +14,7 @@
             <div class="brand-icon"><i class="fa-solid fa-hospital"></i></div>
             <div>
                 <div class="brand-title">കേരള മെഡിക്കൽ സെന്റർ</div>
-                <div class="brand-sub">Kerala Medical Center • Voice Receptionist & Telephony Assistant</div>
+                <div class="brand-sub">Kerala Medical Center • Voice Receptionist & Telephony System</div>
             </div>
         </div>
         <div style="display:flex; align-items:center; gap: 1.5rem;">
@@ -41,10 +41,17 @@
                 <div class="avatar-container">
                     <i class="fa-solid fa-user-doctor"></i>
                 </div>
-                <div class="call-status">CONNECTED • 24x7 VOICE ASSISTANT</div>
+                <div class="call-status">CONNECTED • REAL-TIME WEBSOCKET VOICE STREAM</div>
                 <h2 class="bot-title">കേരള മെഡിക്കൽ വോയ്സ് റിസപ്ഷനിസ്റ്റ്</h2>
 
-                <div id="emergencyAlert" class="badge badge-red" style="display:none; width: 100%; text-align: center; margin-bottom: 1rem; padding: 10px;"></div>
+                <!-- Badges & VAD Meter -->
+                <div id="emergencyAlert" class="badge badge-red" style="display:none; width: 100%; text-align: center; margin-bottom: 0.8rem; padding: 10px;"></div>
+                <div id="bargeInBadge" class="badge badge-red" style="display:none; width: 100%; text-align: center; margin-bottom: 0.8rem; padding: 6px;"></div>
+
+                <!-- VAD Audio Volume Bar -->
+                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-bottom: 1rem;">
+                    <div id="vadVolumeBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent-teal), var(--accent-emerald)); transition: width 0.05s ease;"></div>
+                </div>
 
                 <div class="live-transcript-box" id="liveTranscript">
                     <div class="msg-bubble msg-bot">
@@ -80,30 +87,39 @@
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-bottom: 1rem; color: var(--accent-blue);"><i class="fa-solid fa-brain"></i> Voice & Telemetry Engine</h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
+                    <h3 style="margin-bottom: 1rem; color: var(--accent-blue);"><i class="fa-solid fa-brain"></i> Real-Time Voice Telemetry & Tools</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem;">
                         <span class="badge badge-teal" id="intentBadge">Intent: GREETING</span>
-                        <span class="badge badge-teal">Multilingual: Malayalam / English</span>
+                        <span class="badge badge-emerald" id="toolCallBadge" style="display:none;">⚡ Tool: book_appointment</span>
                     </div>
+
+                    <!-- Real-Time Latency Metrics Breakdown -->
+                    <div id="latencyBreakdown" style="background: rgba(5,8,17,0.7); border: 1px solid rgba(79, 172, 254, 0.2); border-radius: 12px; padding: 10px; margin-bottom: 1rem;">
+                        <div style="font-size:0.8rem; color:var(--text-sub);">Latency Telemetry (STT • LLM • Tool • TTS):</div>
+                        <div style="font-size:0.85rem; color:var(--accent-teal); font-family:monospace; margin-top:4px;">
+                            <span>STT: 90ms</span> • <span>LLM: 120ms</span> • <span>Tool: 15ms</span> • <strong style="color:var(--accent-emerald);">Total: 310ms</strong>
+                        </div>
+                    </div>
+
                     <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.5;">
-                        The system normalizes Manglish & Malayalam speech, processes English prompts, extracts doctor schedules, and initiates immediate emergency escalation when critical symptoms are detected.
+                        Features instant <strong>Barge-in interruption</strong>, streaming WebSocket transport (`/ws/voice`), function tool calling, short/long term patient memory, and low-latency turn-taking.
                     </p>
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-bottom: 0.8rem; color: var(--accent-emerald);"><i class="fa-solid fa-bolt"></i> Sample Prompts (Malayalam & English)</h3>
+                    <h3 style="margin-bottom: 0.8rem; color: var(--accent-emerald);"><i class="fa-solid fa-bolt"></i> Sample Interactive Tool Prompts</h3>
                     <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechToBackend('I want to book an appointment with Dr. Meera tomorrow')">
-                            "I want to book an appointment with Dr. Meera tomorrow" (English)
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechInput('I want to book an appointment with Dr. Meera tomorrow')">
+                            "I want to book an appointment with Dr. Meera tomorrow" (Tool: Book Appointment)
                         </button>
-                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechToBackend('നാളെ ഡോക്ടർ മീരയെ കാണാൻ അപ്പോയിന്റ്മെന്റ് വേണം')">
-                            "നാളെ ഡോക്ടർ മീരയെ കാണാൻ അപ്പോയിന്റ്മെന്റ് വേണം" (Malayalam)
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechInput('നാളെ ഡോക്ടർ മീരയെ കാണാൻ അപ്പോയിന്റ്മെന്റ് വേണം')">
+                            "നാളെ ഡോക്ടർ മീരയെ കാണാൻ അപ്പോയിന്റ്മെന്റ് വേണം" (Malayalam Tool Booking)
                         </button>
-                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechToBackend('Is my blood test lab report ready?')">
-                            "Is my blood test lab report ready?" (English)
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechInput('Is my blood test lab report ready?')">
+                            "Is my blood test lab report ready?" (Tool: Lab Status)
                         </button>
-                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left; border-color: rgba(255, 75, 92, 0.4);" onclick="sendSpeechToBackend('എനിക്ക് ശക്തമായ നെഞ്ചുവേദന അനുഭവപ്പെടുന്നു')">
-                            "എനിക്ക് ശക്തമായ നെഞ്ചുവേദന അനുഭവപ്പെടുന്നു" (Emergency Trigger)
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left; border-color: rgba(255, 75, 92, 0.4);" onclick="sendSpeechInput('എനിക്ക് ശക്തമായ നെഞ്ചുവേദന അനുഭവപ്പെടുന്നു')">
+                            "എനിക്ക് ശക്തമായ നെഞ്ചുവേദന അനുഭവപ്പെടുന്നു" (Emergency Escalation Tool)
                         </button>
                     </div>
                 </div>
@@ -114,7 +130,7 @@
     </div>
 
     <footer>
-        <p>കേരള മെഡിക്കൽ സെന്റർ (KMC) • 24x7 Malayalam & English Hospital Voice Assistant • Powered by Python FastAPI</p>
+        <p>കേരള മെഡിക്കൽ സെന്റർ (KMC) • 24x7 Multilingual Voice Assistant Engine • Built with Python FastAPI & WebSockets</p>
     </footer>
 
     <script src="/static/js/voice_app.js"></script>
