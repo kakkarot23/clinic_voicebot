@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMC WhatsApp Hospital Assistant</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .wa-box {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #0b141a;
+            border: 1px solid #202c33;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        }
+        .wa-header {
+            background: #202c33;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #e9edef;
+        }
+        .wa-body {
+            height: 450px;
+            padding: 1rem;
+            overflow-y: auto;
+            background-image: radial-gradient(#1f2c34 1px, transparent 1px);
+            background-size: 16px 16px;
+        }
+        .wa-bubble-user {
+            background: #005c4b;
+            color: #e9edef;
+            padding: 10px 14px;
+            border-radius: 12px 0 12px 12px;
+            margin-left: auto;
+            max-width: 80%;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        .wa-bubble-bot {
+            background: #202c33;
+            color: #e9edef;
+            padding: 10px 14px;
+            border-radius: 0 12px 12px 12px;
+            margin-right: auto;
+            max-width: 80%;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+        .wa-footer {
+            background: #202c33;
+            padding: 10px;
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-brands fa-whatsapp"></i></div>
+            <div>
+                <div class="brand-title">കേരള മെഡിക്കൽ WhatsApp Assistant</div>
+                <div class="brand-sub">Voice & Text Malayalam & English Hospital Desk</div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="/" class="nav-item"><i class="fa-solid fa-phone"></i> Voice Assistant</a>
+            <a href="/whatsapp" class="nav-item active"><i class="fa-brands fa-whatsapp"></i> WhatsApp Assistance</a>
+            <a href="/kiosk" class="nav-item"><i class="fa-solid fa-map-location-dot"></i> Voice Kiosk</a>
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Staff Dashboard</a>
+            <a href="/admin" class="nav-item"><i class="fa-solid fa-gear"></i> Admin Portal</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="wa-box">
+            <div class="wa-header">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #00a884; display:flex; align-items:center; justify-content:center; font-size:20px;">
+                    🏥
+                </div>
+                <div>
+                    <div style="font-weight: 700;">Kerala Medical Assistant</div>
+                    <div style="font-size: 0.75rem; color: #8696a0;">Official Hospital Account • Verified</div>
+                </div>
+            </div>
+            <div class="wa-body" id="waBody">
+                <div class="wa-bubble-bot">
+                    നമസ്കാരം! കേരള മെഡിക്കൽ സെന്റർ വാട്ട്സ്ആപ്പ് ഹെൽപ്പ് ഡെസ്കിലേക്ക് സ്വാഗതം. നിങ്ങൾക്ക് ഡോക്ടർ അപ്പോയിന്റ്മെന്റ് ബുക്ക് ചെയ്യാനും ലാബ് റിപ്പോർട്ടുകൾ പരിശോധിക്കാനും മലയാളത്തിലോ ഇംഗ്ലീഷിലോ സന്ദേശം അയക്കാം.
+                </div>
+            </div>
+            <div class="wa-footer">
+                <input type="text" id="waInput" class="form-input" placeholder="Type message in Malayalam or English..." onkeypress="if(event.key==='Enter') sendWAMsg()">
+                <button class="btn btn-mic" style="background:#00a884;" onclick="sendWAMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function sendWAMsg() {
+            const input = document.getElementById("waInput");
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = "";
+
+            const body = document.getElementById("waBody");
+            body.innerHTML += `<div class="wa-bubble-user">${text}</div>`;
+            body.scrollTop = body.scrollHeight;
+
+            try {
+                const res = await fetch("/api/whatsapp/send", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({ phone: "9876543210", message_text: text })
+                });
+                const data = await res.json();
+                body.innerHTML += `<div class="wa-bubble-bot">${data.reply_text_ml}</div>`;
+                body.scrollTop = body.scrollHeight;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

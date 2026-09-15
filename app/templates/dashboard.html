@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMC Staff & Receptionist Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 18px;
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: rgba(79, 172, 254, 0.15);
+            color: var(--accent-teal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .stat-lbl {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-chart-line"></i></div>
+            <div>
+                <div class="brand-title">കേരള മെഡിക്കൽ ഫ്രണ്ട് ഓഫീസ് ഡാഷ്‌ബോർഡ്</div>
+                <div class="brand-sub">Real-time Telephony Analytics & Live Staff Transfer Desk</div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="/" class="nav-item"><i class="fa-solid fa-phone"></i> Voice Assistant</a>
+            <a href="/whatsapp" class="nav-item"><i class="fa-brands fa-whatsapp"></i> WhatsApp Assistance</a>
+            <a href="/kiosk" class="nav-item"><i class="fa-solid fa-map-location-dot"></i> Voice Kiosk</a>
+            <a href="/dashboard" class="nav-item active"><i class="fa-solid fa-chart-line"></i> Staff Dashboard</a>
+            <a href="/admin" class="nav-item"><i class="fa-solid fa-gear"></i> Admin Portal</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <!-- Stats Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-phone-volume"></i></div>
+                <div>
+                    <div class="stat-val" id="statCalls">428</div>
+                    <div class="stat-lbl">ഇന്നത്തെ കോളുകൾ (Total Calls)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: var(--accent-emerald);"><i class="fa-solid fa-calendar-check"></i></div>
+                <div>
+                    <div class="stat-val" id="statAppointments">156</div>
+                    <div class="stat-lbl">ബുക്കിംഗുകൾ (Appointments)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: var(--accent-red);"><i class="fa-solid fa-truck-medical"></i></div>
+                <div>
+                    <div class="stat-val" id="statEmergencies">7</div>
+                    <div class="stat-lbl">എമർജൻസി ട്രാഫിക് (Emergency Calls)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="color: var(--accent-amber);"><i class="fa-solid fa-headset"></i></div>
+                <div>
+                    <div class="stat-val" id="statTransfers">32</div>
+                    <div class="stat-lbl">സ്റ്റാഫ് ട്രാൻസ്ഫർ (Human Transfers)</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.5rem;">
+            <!-- Live Appointments Table -->
+            <div class="card">
+                <h3 style="margin-bottom: 1rem; color: var(--accent-teal);"><i class="fa-solid fa-list-check"></i> സമീപകാല അപ്പോയിന്റ്മെന്റുകൾ (Appointments)</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Patient Name</th>
+                                <th>Doctor</th>
+                                <th>Date/Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appTableBody">
+                            <tr><td colspan="5">Loading real-time hospital appointments...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Live Doctors Desk -->
+            <div class="card">
+                <h3 style="margin-bottom: 1rem; color: var(--accent-blue);"><i class="fa-solid fa-user-doctor"></i> ലഭ്യമായ ഡോക്ടർമാർ (Doctors On Duty)</h3>
+                <div id="doctorsList" style="display: flex; flex-direction: column; gap: 12px;">
+                    Loading doctors...
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                const statsRes = await fetch("/api/hospital/dashboard-stats");
+                const stats = await statsRes.json();
+                document.getElementById("statCalls").innerText = stats.calls_today;
+                document.getElementById("statAppointments").innerText = stats.appointments_today;
+                document.getElementById("statEmergencies").innerText = stats.emergency_calls;
+                document.getElementById("statTransfers").innerText = stats.human_transfers;
+
+                const appRes = await fetch("/api/appointments/");
+                const apps = await appRes.json();
+                const tbody = document.getElementById("appTableBody");
+                tbody.innerHTML = apps.map(a => `
+                    <tr>
+                        <td><strong>${a.appointment_number}</strong></td>
+                        <td>${a.patient_name} <br><small style="color:var(--text-sub);">${a.patient_phone}</small></td>
+                        <td>${a.doctor_name}</td>
+                        <td>${a.date}<br><small>${a.time_slot}</small></td>
+                        <td><span class="badge badge-emerald">${a.status}</span></td>
+                    </tr>
+                `).join('');
+
+                const docRes = await fetch("/api/hospital/doctors");
+                const docs = await docRes.json();
+                const docDiv = document.getElementById("doctorsList");
+                docDiv.innerHTML = docs.map(d => `
+                    <div style="background: rgba(5,8,17,0.6); padding: 10px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="color: #fff;">${d.name_ml} (${d.name_en})</strong>
+                            <div style="font-size: 0.8rem; color: var(--text-sub);">${d.specialization_ml}</div>
+                        </div>
+                        <span class="badge badge-teal">Room ${d.room_number}</span>
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                console.error("Failed loading dashboard:", e);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>കേരള മെഡിക്കൽ സെന്റർ | Hospital Voice Assistant</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-hospital"></i></div>
+            <div>
+                <div class="brand-title">കേരള മെഡിക്കൽ സെന്റർ</div>
+                <div class="brand-sub">Kerala Medical Center • Voice Receptionist & Telephony Assistant</div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap: 1.5rem;">
+            <div class="lang-switcher">
+                <button class="lang-btn active" id="langBtn_ml" onclick="setLanguage('ml')">മലയാളം</button>
+                <button class="lang-btn" id="langBtn_en" onclick="setLanguage('en')">English</button>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-item active"><i class="fa-solid fa-phone"></i> Voice Assistant</a>
+                <a href="/whatsapp" class="nav-item"><i class="fa-brands fa-whatsapp"></i> WhatsApp Assistance</a>
+                <a href="/kiosk" class="nav-item"><i class="fa-solid fa-map-location-dot"></i> Voice Kiosk</a>
+                <a href="/dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Staff Dashboard</a>
+                <a href="/admin" class="nav-item"><i class="fa-solid fa-gear"></i> Admin Portal</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        
+        <div class="voice-hero">
+            <!-- Left: Phone Simulator -->
+            <div class="phone-simulator">
+                <div class="pulse-ring"></div>
+                <div class="avatar-container">
+                    <i class="fa-solid fa-user-doctor"></i>
+                </div>
+                <div class="call-status">CONNECTED • 24x7 VOICE ASSISTANT</div>
+                <h2 class="bot-title">കേരള മെഡിക്കൽ വോയ്സ് റിസപ്ഷനിസ്റ്റ്</h2>
+
+                <div id="emergencyAlert" class="badge badge-red" style="display:none; width: 100%; text-align: center; margin-bottom: 1rem; padding: 10px;"></div>
+
+                <div class="live-transcript-box" id="liveTranscript">
+                    <div class="msg-bubble msg-bot">
+                        <strong>KMC Voice Assistant:</strong> നമസ്കാരം! കേരള മെഡിക്കൽ സെന്റർ ഫ്രണ്ട് ഓഫീസിലേക്ക് സ്വാഗതം. ഞാൻ എങ്ങനെയാണ് സഹായിക്കേണ്ടത്?
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                    <button class="btn btn-mic" id="micBtn" onclick="toggleMicrophone()">
+                        <i class="fa-solid fa-microphone"></i>
+                        <span id="micBtnLabel">സംസാരിക്കുക (Click to Speak)</span>
+                    </button>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="userTextInput" class="form-input" placeholder="മലയാളത്തിലോ ഇംഗ്ലീഷിലോ ടൈപ്പ് ചെയ്യുക (e.g. I want an appointment with Dr. Meera / നാളെ അപ്പോയിന്റ്മെന്റ് വേണം)..." onkeypress="if(event.key === 'Enter') sendManualText()">
+                    <button class="btn btn-secondary" onclick="sendManualText()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+
+            <!-- Right: Live Telemetry & Verification Desk -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--accent-teal);"><i class="fa-solid fa-id-card"></i> കോളർ വെരിഫിക്കേഷൻ (Caller Identity)</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <label style="font-size: 0.85rem; color: var(--text-sub);">Caller Mobile Number:</label>
+                        <input type="text" id="phoneInput" class="form-input" value="9876543210" style="margin-top: 4px;">
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <span class="badge badge-emerald"><i class="fa-solid fa-shield-check"></i> Patient Recognized: KMC-1001 (Ajith Kumar / അജിത്ത് കുമാർ)</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem; color: var(--accent-blue);"><i class="fa-solid fa-brain"></i> Voice & Telemetry Engine</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem;">
+                        <span class="badge badge-teal" id="intentBadge">Intent: GREETING</span>
+                        <span class="badge badge-teal">Multilingual: Malayalam / English</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-sub); line-height: 1.5;">
+                        The system normalizes Manglish & Malayalam speech, processes English prompts, extracts doctor schedules, and initiates immediate emergency escalation when critical symptoms are detected.
+                    </p>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 0.8rem; color: var(--accent-emerald);"><i class="fa-solid fa-bolt"></i> Sample Prompts (Malayalam & English)</h3>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechToBackend('I want to book an appointment with Dr. Meera tomorrow')">
+                            "I want to book an appointment with Dr. Meera tomorrow" (English)
+                        </button>
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechToBackend('നാളെ ഡോക്ടർ മീരയെ കാണാൻ അപ്പോയിന്റ്മെന്റ് വേണം')">
+                            "നാളെ ഡോക്ടർ മീരയെ കാണാൻ അപ്പോയിന്റ്മെന്റ് വേണം" (Malayalam)
+                        </button>
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left;" onclick="sendSpeechToBackend('Is my blood test lab report ready?')">
+                            "Is my blood test lab report ready?" (English)
+                        </button>
+                        <button class="btn btn-secondary" style="font-size: 0.85rem; text-align: left; border-color: rgba(255, 75, 92, 0.4);" onclick="sendSpeechToBackend('എനിക്ക് ശക്തമായ നെഞ്ചുവേദന അനുഭവപ്പെടുന്നു')">
+                            "എനിക്ക് ശക്തമായ നെഞ്ചുവേദന അനുഭവപ്പെടുന്നു" (Emergency Trigger)
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>കേരള മെഡിക്കൽ സെന്റർ (KMC) • 24x7 Malayalam & English Hospital Voice Assistant • Powered by Python FastAPI</p>
+    </footer>
+
+    <script src="/static/js/voice_app.js"></script>
+</body>
+</html>

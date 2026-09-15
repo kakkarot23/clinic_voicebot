@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMC Entrance Voice Kiosk</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div>
+                <div class="brand-title">കേരള മെഡിക്കൽ എൻട്രൻസ് വോയ്സ് കിയോസ്ക്</div>
+                <div class="brand-sub">Hospital Entrance Voice Navigation & Wayfinding</div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="/" class="nav-item"><i class="fa-solid fa-phone"></i> Voice Assistant</a>
+            <a href="/whatsapp" class="nav-item"><i class="fa-brands fa-whatsapp"></i> WhatsApp Assistance</a>
+            <a href="/kiosk" class="nav-item active"><i class="fa-solid fa-map-location-dot"></i> Voice Kiosk</a>
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Staff Dashboard</a>
+            <a href="/admin" class="nav-item"><i class="fa-solid fa-gear"></i> Admin Portal</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="card" style="text-align: center; max-width: 800px; margin: 0 auto;">
+            <i class="fa-solid fa-building-user" style="font-size: 60px; color: var(--accent-teal); margin-bottom: 1rem;"></i>
+            <h2>എൻട്രൻസ് വോയ്സ് നാവിഗേഷൻ കിയോസ്ക്</h2>
+            <p style="color: var(--text-sub); margin-bottom: 2rem;">നിങ്ങൾക്ക് ആശുപത്രിയിൽ ഏത് വിഭാഗത്തിലേക്കാണ് പോകേണ്ടതെന്ന് ചോദിക്കൂ (e.g. "Orthopedics department എവിടെയാണ്?" / "Where is Cardiology?")</p>
+
+            <div class="input-group" style="max-width: 600px; margin: 0 auto 2rem auto;">
+                <input type="text" id="kioskInput" class="form-input" placeholder="ചോദ്യം പറയുക / ടൈപ്പ് ചെയ്യുക (e.g. Where is Orthopedics department?)..." onkeypress="if(event.key==='Enter') searchKiosk()">
+                <button class="btn btn-mic" onclick="searchKiosk()"><i class="fa-solid fa-search"></i> തിരയുക (Search)</button>
+            </div>
+
+            <div id="kioskResult" style="display: none; background: rgba(5,8,17,0.7); border: 2px solid var(--accent-teal); border-radius: 18px; padding: 2rem; text-align: left;">
+                <h3 id="locTitle" style="color: var(--accent-teal); font-size: 1.5rem; margin-bottom: 0.5rem;"></h3>
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <span class="badge badge-emerald" id="locFloor">Floor: Ground</span>
+                    <span class="badge badge-teal" id="locBlock">Block: Main</span>
+                </div>
+                <p id="locDirections" style="font-size: 1.1rem; line-height: 1.6; color: #f8fafc;"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function searchKiosk() {
+            const query = document.getElementById("kioskInput").value;
+            if (!query) return;
+
+            const res = await fetch("/api/kiosk/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ query: query })
+            });
+
+            const data = await res.json();
+            const resDiv = document.getElementById("kioskResult");
+            resDiv.style.display = "block";
+
+            if (data.found) {
+                document.getElementById("locTitle").innerText = `${data.name_ml} (${data.name_en || ''})`;
+                document.getElementById("locFloor").innerText = `நில / Floor: ${data.floor || 'Ground'}`;
+                document.getElementById("locBlock").innerText = `ബ്ലോക്ക് / Room: ${data.room || data.block || 'Main'}`;
+                document.getElementById("locDirections").innerText = data.directions_ml;
+            } else {
+                document.getElementById("locTitle").innerText = "Information Not Found";
+                document.getElementById("locDirections").innerText = data.voice_response;
+            }
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(data.voice_response);
+                u.lang = 'ml-IN';
+                window.speechSynthesis.speak(u);
+            }
+        }
+    </script>
+</body>
+</html>

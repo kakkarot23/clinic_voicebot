@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMC Admin Configuration Portal</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-gear"></i></div>
+            <div>
+                <div class="brand-title">കേരള മെഡിക്കൽ അഡ്മിൻ പോർട്ടൽ</div>
+                <div class="brand-sub">No-Code Department, Doctor & Voice Response Configuration</div>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="/" class="nav-item"><i class="fa-solid fa-phone"></i> Voice Assistant</a>
+            <a href="/whatsapp" class="nav-item"><i class="fa-brands fa-whatsapp"></i> WhatsApp Assistance</a>
+            <a href="/kiosk" class="nav-item"><i class="fa-solid fa-map-location-dot"></i> Voice Kiosk</a>
+            <a href="/dashboard" class="nav-item"><i class="fa-solid fa-chart-line"></i> Staff Dashboard</a>
+            <a href="/admin" class="nav-item active"><i class="fa-solid fa-gear"></i> Admin Portal</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="card" style="max-width: 700px; margin: 0 auto;">
+            <h3 style="color: var(--accent-teal); margin-bottom: 1.5rem;"><i class="fa-solid fa-user-plus"></i> പുതിയ ഡോക്ടറെ ചേർക്കുക (Add Doctor to System)</h3>
+            
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-sub);">Doctor Name in Malayalam:</label>
+                    <input type="text" id="docMl" class="form-input" placeholder="e.g. ഡോക്ടർ ലക്ഷ്മി പി">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-sub);">Doctor Name in English:</label>
+                    <input type="text" id="docEn" class="form-input" placeholder="e.g. Dr. Lakshmi P">
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-sub);">Department:</label>
+                    <select id="deptSelect" class="form-input" style="background:#0b141a;">
+                        <option value="1">എമർജൻസി & ട്രോമ കെയർ (Emergency & Trauma Care)</option>
+                        <option value="2" selected>ജനറൽ മെഡിസിൻ (General Medicine)</option>
+                        <option value="3">കാർഡിയോളജി (Cardiology)</option>
+                        <option value="4">ന്യൂറോളജി (Neurology)</option>
+                        <option value="5">ഓർത്തോപീഡിക്സ് (Orthopedics)</option>
+                        <option value="6">പീഡിയാട്രിക്സ് (Pediatrics)</option>
+                        <option value="7">ഗൈനക്കോളജി (Gynecology)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-sub);">Specialization (Malayalam / English):</label>
+                    <input type="text" id="docSpec" class="form-input" placeholder="e.g. Senior General Physician">
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <div style="flex:1;">
+                        <label style="font-size: 0.85rem; color: var(--text-sub);">Consultation Fee (₹):</label>
+                        <input type="number" id="docFee" class="form-input" value="500">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="font-size: 0.85rem; color: var(--text-sub);">Room Number:</label>
+                        <input type="text" id="docRoom" class="form-input" value="105">
+                    </div>
+                </div>
+
+                <button class="btn btn-mic" onclick="addDoctor()" style="margin-top: 1rem;"><i class="fa-solid fa-save"></i> Save Doctor to System</button>
+
+                <div id="adminMsg" style="display:none;" class="badge badge-emerald"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function addDoctor() {
+            const nameMl = document.getElementById("docMl").value;
+            const nameEn = document.getElementById("docEn").value;
+            const deptId = document.getElementById("deptSelect").value;
+            const spec = document.getElementById("docSpec").value;
+            const fee = document.getElementById("docFee").value;
+            const room = document.getElementById("docRoom").value;
+
+            if(!nameMl || !nameEn) {
+                alert("Please enter doctor names");
+                return;
+            }
+
+            try {
+                const res = await fetch("/api/admin/doctors", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        name_ml: nameMl,
+                        name_en: nameEn,
+                        department_id: parseInt(deptId),
+                        specialization_ml: spec,
+                        fee: parseFloat(fee),
+                        room_number: room
+                    })
+                });
+                const data = await res.json();
+                const msg = document.getElementById("adminMsg");
+                msg.style.display = "block";
+                msg.innerText = data.message;
+            } catch(e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>
